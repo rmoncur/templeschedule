@@ -71,5 +71,66 @@ namespace TempleSchedule {
 			}
 
 		}
+
+		//Adjusting the gaps
+		internal void adjustGap() {
+			
+			List<TimeSlot> sorted = this.timeslots.OrderBy(x => x.startTime).ToList();
+			TimeSpan smallestGap = new TimeSpan();
+			TimeSlot t1 = new TimeSlot(), t2 = new TimeSlot();
+
+			//Computing the smallest gap between dates as well as finding the timeslots around it
+			for (int i = 0; i < sorted.Count - 1; i++) {
+				
+				//Computing the span
+				TimeSpan currentGap = sorted[i + 1].startTime - sorted[i].startTime;
+
+				if (i == 0) {
+					smallestGap = currentGap;
+					t2 = sorted[i + 1];
+					t1 = sorted[i];
+					continue;
+				}
+
+				if (currentGap < smallestGap) {
+					smallestGap = currentGap;
+					t2 = sorted[i + 1];
+					t1 = sorted[i];
+				}
+			}
+
+			//Swapping until it is in the threshhold
+			int loops = 0;
+			int minGap = 30;
+			while (true) {
+
+				//Swap slots with another ward
+				List<TimeSlot> tempList = new List<TimeSlot>(t1.sectionList);
+				tempList.Shuffle();
+
+				TimeSlot tOther = tempList.First(x => x.assignedWard != null);
+				Ward tOtherWard = tOther.assignedWard;
+
+				double t1Gap1 = this.minTimeslotSpacing;
+				t1.swapWards(tOther);
+				double t1Gap2 = this.minTimeslotSpacing;
+
+				if (tOtherWard.minTimeslotSpacing > minGap && this.minTimeslotSpacing > minGap) {
+					break;
+				} else 
+					t1.swapWards(tOther);
+
+				if (loops > 5000) {
+					minGap--;
+					loops = 0;
+				}
+
+				loops++;
+
+
+			}
+
+
+		}
 	}
 }

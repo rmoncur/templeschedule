@@ -313,7 +313,7 @@
 			this.numericUpDownWeekends.Size = new System.Drawing.Size(31, 20);
 			this.numericUpDownWeekends.TabIndex = 2;
 			this.numericUpDownWeekends.Value = new decimal(new int[] {
-            2,
+            1,
             0,
             0,
             0});
@@ -336,7 +336,7 @@
 			this.numericUpDownWeekdays.Size = new System.Drawing.Size(31, 20);
 			this.numericUpDownWeekdays.TabIndex = 4;
 			this.numericUpDownWeekdays.Value = new decimal(new int[] {
-            4,
+            5,
             0,
             0,
             0});

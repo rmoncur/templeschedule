@@ -52,43 +52,54 @@ namespace TempleSchedule {
 				blackoutDates.Add(new DateTime(2014, 11, 27));
 			}
 
-			//Read in Times
-			DateTime begin = new DateTime(2015, 1, 1);
-			DateTime end = new DateTime(2015, 12, 31);
+				
+			// 1) Randomize Wards
+			List<Ward> shuffledWards = new List<Ward>(this.wards);
+			shuffledWards.Shuffle();
 
-			//Looping through each timeperiod section and assigning wards timeslots
-			for (int i = 0; i < this.numericUpDown1.Value; i++) {
+			Dictionary<int, Queue<TimeSlot>> weekendDictionaryQueues = new Dictionary<int,Queue<TimeSlot>>();
+			foreach (KeyValuePair<int, List<TimeSlot>> k in weekendIntervalTimeSlots) {
+				weekendDictionaryQueues.Add(k.Key, new Queue<TimeSlot>(k.Value));
+			}
+			
+			Dictionary<int, Queue<TimeSlot>> weekdayDictionaryQueues = new Dictionary<int, Queue<TimeSlot>>();
+			foreach (KeyValuePair<int, List<TimeSlot>> k in weekdayIntervalTimeSlots) {
+				weekdayDictionaryQueues.Add(k.Key, new Queue<TimeSlot>(k.Value));
+			}
 
-				List<Ward> shuffledWards = new List<Ward>(this.wards);
-				shuffledWards.Shuffle();
 
-				foreach (Ward w in shuffledWards) {
+			// 2) Loop through each ward, assigning it timeslots from each period
+			foreach (Ward w in shuffledWards) {
 
-					//Skipping if it has too many already
-					if (w.timeslots.Count > this.numericUpDown1.Value)
-						continue;
-
-					this.weekendIntervalTimeSlots[i].Shuffle();
-					this.weekdayIntervalTimeSlots[i].Shuffle();
+				//Looping through each timeslot
+				for (int i = 0; i < intervalTimeSlots.Count; i++) {
 
 					//Adding weekends first... then weekdays
-					if (this.weekendIntervalTimeSlots[i].Count > 0 && w.numWeekends < this.numericUpDownWeekends.Value) {
-						TimeSlot t = this.weekendIntervalTimeSlots[i][this.weekendIntervalTimeSlots[i].Count - 1];
+					if (weekendDictionaryQueues[i].Count > 0 && w.numWeekends < this.numericUpDownWeekends.Value) {
+						//TimeSlot t = this.weekendIntervalTimeSlots[i][this.weekendIntervalTimeSlots[i].Count - 1];
+						TimeSlot t = weekendDictionaryQueues[i].Dequeue();
 						w.timeslots.Add(t);	//adding to the ward
 						t.assignedWard = w;
-						this.weekendIntervalTimeSlots[i].Remove(t);	//removing from the list
-					} else if(weekdayIntervalTimeSlots[i].Count > 0) {
-						TimeSlot t = this.weekdayIntervalTimeSlots[i][this.weekdayIntervalTimeSlots[i].Count - 1];
+						//this.weekendIntervalTimeSlots[i].Remove(t);	//removing from the list
+					} else if (weekdayDictionaryQueues[i].Count > 0) {
+						//TimeSlot t = this.weekdayIntervalTimeSlots[i][this.weekdayIntervalTimeSlots[i].Count - 1];
+						TimeSlot t = weekdayDictionaryQueues[i].Dequeue();
 						w.timeslots.Add(t);	//adding to the ward
 						t.assignedWard = w;
-						this.weekdayIntervalTimeSlots[i].Remove(t);	//removing from the list
+						//this.weekdayIntervalTimeSlots[i].Remove(t);	//removing from the list
+					} else if (weekendDictionaryQueues[i].Count > 0) {
+						//TimeSlot t = this.weekendIntervalTimeSlots[i][this.weekendIntervalTimeSlots[i].Count - 1];
+						TimeSlot t = weekendDictionaryQueues[i].Dequeue();
+						w.timeslots.Add(t);	//adding to the ward
+						t.assignedWard = w;
+						//this.weekendIntervalTimeSlots[i].Remove(t);	//removing from the list
 					}
 
 				}
 
-
 			}
 
+			
 			//Prioritizing Later Timeslots
 			foreach (TimeSlot t in this.timeslots) {
 
@@ -120,44 +131,30 @@ namespace TempleSchedule {
 
 			}
 
+			//Filling unused timeslots with unfilled wards
+			List<Ward> notFullWards = this.wards.FindAll(s => s.timeslots.Count < this.numericUpDown1.Value);
+			List<TimeSlot> unusedTimeslots = this.timeslots.FindAll(s => s.assignedWard == null);
+			Queue<TimeSlot> unusedTimeslotsQueue = new Queue<TimeSlot>(unusedTimeslots);			
+			foreach (Ward w in notFullWards) {
+				if (unusedTimeslotsQueue.Count > 0) {
+					TimeSlot t = unusedTimeslotsQueue.Dequeue();
+					w.timeslots.Add(t);
+					t.assignedWard = w;
+				}
+			}
+
+			///Adjusting dates that are too close together
+			List<Ward> improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < 30);
+			foreach (Ward w in improperGapWards) {
+				w.adjustGap();
+			}
+
+			improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < 26);
+
 			//Writing Output
 			this.writeOutput();
 
-			return;
-
-			//TODO: Assigning Wards with less than maximum timeslots
-			List<Ward> notFullWards = this.wards.FindAll(s => s.timeslots.Count < this.numericUpDown1.Value);
-
-			foreach (Ward w in notFullWards) {
-
-				TimeSlot maxDistanceSlot = null;
-				TimeSpan maxDistanceSpan = new TimeSpan();
-
-				foreach (TimeSlot wt in w.timeslots) {
-
-					foreach (TimeSlot t in this.timeslots.FindAll(s => s.assignedWard == null)) {
-
-						if (maxDistanceSlot == null) {	//If this is the first span, then it is the king automatically
-							maxDistanceSlot = t;
-							maxDistanceSpan = t.startTime - wt.startTime;
-							continue;
-						} else {
-
-							TimeSpan tspan = t.startTime - wt.startTime;
-							if (tspan.TotalHours > maxDistanceSpan.TotalHours) {	//If this span is closer
-								maxDistanceSpan = tspan;
-							}
-
-						}
-
-
-
-						//TODO: Find the largest distance
-
-					}
-
-				}
-			}
+			return;						
 			
 
 		}
@@ -191,7 +188,8 @@ namespace TempleSchedule {
 
 			// 2) Divide up available days into equal intervals
 			int totalDays = availableDays.Count;
-			int intervalLength = (int)(totalDays / this.numericUpDown1.Value);
+			decimal decimalInterval = totalDays / this.numericUpDown1.Value;
+			int intervalLength = (int)Math.Ceiling(decimalInterval);
 			int currentSpan = 0;
 			for (int i = 0; i < this.numericUpDown1.Value; i++) {	//Adding a list for each timeslot
 				this.intervalTimeSlots.Add(i, new List<TimeSlot>());
@@ -202,9 +200,6 @@ namespace TempleSchedule {
 			// 3) Generate Timeslots for each day
 
 			//Looping through each date in the range
-			int its = 0;
-			//for (DateTime date = availableDays[0]; date <= availableDays[availableDays.Count-1]; date = date.AddDays(1), its++) {
-
 			for (int i = 0; i < availableDays.Count; i++ ){
 
 				DateTime date = availableDays[i];
@@ -222,6 +217,8 @@ namespace TempleSchedule {
 						weekdaytimeslots.Add(ts);
 						weekdayIntervalTimeSlots[currentSpan].Add(ts);
 						intervalTimeSlots[currentSpan].Add(ts);
+						//ts.sectionList = intervalTimeSlots[currentSpan];
+						ts.sectionList = weekdayIntervalTimeSlots[currentSpan];
 					}
 
 				} else { //Adding Saturdays
@@ -232,11 +229,15 @@ namespace TempleSchedule {
 						weekendtimeslots.Add(ts);
 						weekendIntervalTimeSlots[currentSpan].Add(ts);
 						intervalTimeSlots[currentSpan].Add(ts);
+						//ts.sectionList = intervalTimeSlots[currentSpan];
+						ts.sectionList = weekendIntervalTimeSlots[currentSpan];
 					}
 
 				}
 
 			}
+
+			List<TimeSlot> asdf = this.timeslots.FindAll(x => x.sectionList == null);
 
 			//Adding interval text to the data table
 			this.listView1.Items.Clear();

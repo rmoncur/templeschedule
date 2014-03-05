@@ -22,16 +22,35 @@ namespace TempleSchedule {
 
 		public void swapWards(TimeSlot t) {
 
-			//Swapping Timeslots
-			this.assignedWard.timeslots.Add(t);
-			this.assignedWard.timeslots.Remove(this);
-			t.assignedWard.timeslots.Add(this);
-			t.assignedWard.timeslots.Remove(t);
+			if (t.assignedWard != null && this.assignedWard != null) {
 
-			//Swapping Wards
-			Ward tempWard = t.assignedWard;
-			t.assignedWard = this.assignedWard;
-			this.assignedWard = tempWard;
+				//Swapping Timeslots
+				this.assignedWard.timeslots.Add(t);
+				this.assignedWard.timeslots.Remove(this);
+				t.assignedWard.timeslots.Add(this);
+				t.assignedWard.timeslots.Remove(t);
+
+				//Swapping Wards
+				Ward tempWard = t.assignedWard;
+				t.assignedWard = this.assignedWard;
+				this.assignedWard = tempWard;
+			} else if(t.assignedWard == null) {
+
+				t.assignedWard = this.assignedWard;
+				t.assignedWard.timeslots.Add(t);
+				
+				this.assignedWard.timeslots.Remove(this);
+				this.assignedWard = null;
+
+			} else if (this.assignedWard == null) {
+
+				this.assignedWard = t.assignedWard;
+				this.assignedWard.timeslots.Add(this);
+
+				t.assignedWard.timeslots.Remove(t);
+				t.assignedWard = null;
+
+			}
 			
 		}
 	}

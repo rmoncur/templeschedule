@@ -17,6 +17,7 @@ namespace TempleSchedule {
 			InitializeComponent();
 		}
 
+		int iterations = 0;
 		List<Ward> wards = new List<Ward>();
 		List<TimeSlot> timeslots = new List<TimeSlot>();
 		Queue<TimeSlot> freetimeslots = new Queue<TimeSlot>();
@@ -59,12 +60,16 @@ namespace TempleSchedule {
 
 			Dictionary<int, Queue<TimeSlot>> weekendDictionaryQueues = new Dictionary<int,Queue<TimeSlot>>();
 			foreach (KeyValuePair<int, List<TimeSlot>> k in weekendIntervalTimeSlots) {
-				weekendDictionaryQueues.Add(k.Key, new Queue<TimeSlot>(k.Value));
+				List<TimeSlot> tempList = new List<TimeSlot>(k.Value);
+				tempList.Shuffle();
+				weekendDictionaryQueues.Add(k.Key, new Queue<TimeSlot>(tempList));
 			}
 			
 			Dictionary<int, Queue<TimeSlot>> weekdayDictionaryQueues = new Dictionary<int, Queue<TimeSlot>>();
 			foreach (KeyValuePair<int, List<TimeSlot>> k in weekdayIntervalTimeSlots) {
-				weekdayDictionaryQueues.Add(k.Key, new Queue<TimeSlot>(k.Value));
+				List<TimeSlot> tempList = new List<TimeSlot>(k.Value);
+				tempList.Shuffle();
+				weekdayDictionaryQueues.Add(k.Key, new Queue<TimeSlot>(tempList));
 			}
 
 
@@ -144,12 +149,24 @@ namespace TempleSchedule {
 			}
 
 			///Adjusting dates that are too close together
-			List<Ward> improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < 30);
+			///
+			int minGap = 40;
+			List<Ward> improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < minGap);
 			foreach (Ward w in improperGapWards) {
-				w.adjustGap();
+				w.adjustGap(minGap);
 			}
 
-			improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < 26);
+			improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < 35).OrderByDescending(s=>s.minTimeslotSpacing).ToList();
+
+			if (improperGapWards.Count > 0) {
+				this.iterations++;
+				this.reset();
+				this.makeScheduleButton_Click(null, null);
+				return;
+			}
+
+			//this.wards.Sort(0,0,Ward.minTimeslotSpacing);
+
 
 			//Writing Output
 			this.writeOutput();
@@ -157,6 +174,13 @@ namespace TempleSchedule {
 			return;						
 			
 
+		}
+
+		private void reset() {
+			this.generateTimeSlots(dateTimePickerFrom.Value,dateTimePickerTo.Value);
+			foreach (Ward w in this.wards) {
+				w.timeslots.Clear();
+			}
 		}
 
 		/// <summary>
@@ -399,11 +423,8 @@ namespace TempleSchedule {
 		/// Load Function
 		/// </summary>		
 		private void Form1_Load(object sender, EventArgs e) {
-
 			//Generating the timeslots
-			DateTime begin = new DateTime(2015, 1, 1);
-			DateTime end = new DateTime(2015, 12, 31);	
-			this.generateTimeSlots(begin,end);
+			this.generateTimeSlots(dateTimePickerFrom.Value, dateTimePickerTo.Value);
 		}
 	}
 }

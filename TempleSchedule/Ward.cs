@@ -32,7 +32,8 @@ namespace TempleSchedule {
 		//Returning the minimum distance between timeslots. This should ideally be above 30
 		public double minTimeslotSpacing {
 			//Sort the list
-			get {
+			get {				
+
 				List<TimeSlot> sorted = this.timeslots.OrderBy(x => x.startTime).ToList();
 
 				TimeSpan smallestGap = new TimeSpan();
@@ -73,7 +74,7 @@ namespace TempleSchedule {
 		}
 
 		//Adjusting the gaps
-		internal void adjustGap() {
+		internal void adjustGap(int minGap) {
 			
 			List<TimeSlot> sorted = this.timeslots.OrderBy(x => x.startTime).ToList();
 			TimeSpan smallestGap = new TimeSpan();
@@ -101,29 +102,34 @@ namespace TempleSchedule {
 
 			//Swapping until it is in the threshhold
 			int loops = 0;
-			int minGap = 30;
+			//int minGap = 40;
 			while (true) {
 
 				//Swap slots with another ward
 				List<TimeSlot> tempList = new List<TimeSlot>(t1.sectionList);
 				tempList.Shuffle();
 
-				TimeSlot tOther = tempList.First(x => x.assignedWard != null);
-				Ward tOtherWard = tOther.assignedWard;
-
-				double t1Gap1 = this.minTimeslotSpacing;
-				t1.swapWards(tOther);
-				double t1Gap2 = this.minTimeslotSpacing;
-
-				if (tOtherWard.minTimeslotSpacing > minGap && this.minTimeslotSpacing > minGap) {
-					break;
-				} else 
+				
+				//Going through each TimeSlot in the same period and looking for the best fit.
+				//double bestFit;
+				//TimeSlot bestFitSlot;
+				foreach (TimeSlot tOther in tempList) {
+					Ward tOtherWard = tOther.assignedWard;
 					t1.swapWards(tOther);
 
-				if (loops > 5000) {
-					minGap--;
-					loops = 0;
+					//double currentMinSpacing = this.minTimeslotSpacing;
+
+					if ((tOtherWard == null || tOtherWard.minTimeslotSpacing > minGap) && this.minTimeslotSpacing > minGap) {
+						break;
+					} else
+						t1.swapWards(tOther);
+
 				}
+
+				if (this.minTimeslotSpacing < minGap)
+					minGap--;
+				else
+					break;
 
 				loops++;
 

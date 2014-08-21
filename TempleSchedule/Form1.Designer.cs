@@ -52,12 +52,12 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.numericUpDownWeekdays = new System.Windows.Forms.NumericUpDown();
 			this.label3 = new System.Windows.Forms.Label();
+			this.dateTimePickerFrom = new System.Windows.Forms.DateTimePicker();
+			this.dateTimePickerTo = new System.Windows.Forms.DateTimePicker();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.flowLayoutPanel5 = new System.Windows.Forms.FlowLayoutPanel();
 			this.linkLabel1 = new System.Windows.Forms.LinkLabel();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-			this.dateTimePickerFrom = new System.Windows.Forms.DateTimePicker();
-			this.dateTimePickerTo = new System.Windows.Forms.DateTimePicker();
 			this.groupBox1.SuspendLayout();
 			this.flowLayoutPanel1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
@@ -124,6 +124,7 @@
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Times";
+			this.groupBox2.Visible = false;
 			// 
 			// flowLayoutPanel2
 			// 
@@ -294,7 +295,7 @@
 			this.numericUpDown1.Size = new System.Drawing.Size(31, 20);
 			this.numericUpDown1.TabIndex = 0;
 			this.numericUpDown1.Value = new decimal(new int[] {
-            5,
+            2,
             0,
             0,
             0});
@@ -340,7 +341,7 @@
 			this.numericUpDownWeekdays.Size = new System.Drawing.Size(31, 20);
 			this.numericUpDownWeekdays.TabIndex = 4;
 			this.numericUpDownWeekdays.Value = new decimal(new int[] {
-            4,
+            1,
             0,
             0,
             0});
@@ -355,6 +356,22 @@
 			this.label3.Size = new System.Drawing.Size(58, 13);
 			this.label3.TabIndex = 5;
 			this.label3.Text = "Weekdays";
+			// 
+			// dateTimePickerFrom
+			// 
+			this.dateTimePickerFrom.Location = new System.Drawing.Point(3, 29);
+			this.dateTimePickerFrom.Name = "dateTimePickerFrom";
+			this.dateTimePickerFrom.Size = new System.Drawing.Size(200, 20);
+			this.dateTimePickerFrom.TabIndex = 6;
+			this.dateTimePickerFrom.Value = new System.DateTime(2015, 1, 1, 0, 0, 0, 0);
+			// 
+			// dateTimePickerTo
+			// 
+			this.dateTimePickerTo.Location = new System.Drawing.Point(209, 29);
+			this.dateTimePickerTo.Name = "dateTimePickerTo";
+			this.dateTimePickerTo.Size = new System.Drawing.Size(187, 20);
+			this.dateTimePickerTo.TabIndex = 7;
+			this.dateTimePickerTo.Value = new System.DateTime(2015, 12, 31, 23, 59, 0, 0);
 			// 
 			// groupBox5
 			// 
@@ -391,22 +408,6 @@
 			// openFileDialog1
 			// 
 			this.openFileDialog1.FileName = "openFileDialog1";
-			// 
-			// dateTimePickerFrom
-			// 
-			this.dateTimePickerFrom.Location = new System.Drawing.Point(3, 29);
-			this.dateTimePickerFrom.Name = "dateTimePickerFrom";
-			this.dateTimePickerFrom.Size = new System.Drawing.Size(200, 20);
-			this.dateTimePickerFrom.TabIndex = 6;
-			this.dateTimePickerFrom.Value = new System.DateTime(2015, 1, 1, 0, 0, 0, 0);
-			// 
-			// dateTimePickerTo
-			// 
-			this.dateTimePickerTo.Location = new System.Drawing.Point(209, 29);
-			this.dateTimePickerTo.Name = "dateTimePickerTo";
-			this.dateTimePickerTo.Size = new System.Drawing.Size(187, 20);
-			this.dateTimePickerTo.TabIndex = 7;
-			this.dateTimePickerTo.Value = new System.DateTime(2015, 12, 31, 23, 59, 0, 0);
 			// 
 			// Form1
 			// 

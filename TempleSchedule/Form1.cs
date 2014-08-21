@@ -25,8 +25,22 @@ namespace TempleSchedule {
 		List<TimeSlot> weekendtimeslots = new List<TimeSlot>();
 		List<TimeSlot> weekdaytimeslots = new List<TimeSlot>();
 		List<DateTime> blackoutDates = new List<DateTime>();
-		List<int> weekdayStartHours = new List<int>() {5,6,7};
-		List<int> weekendStartHours = new List<int>() {7,8,9};
+		List<TimeSpan> weekdayStartHours = new List<TimeSpan>() {
+			new TimeSpan(15,30,0),
+			new TimeSpan(16,30,0),
+			new TimeSpan(17,30,0),
+			new TimeSpan(18,30,0),
+			new TimeSpan(19,30,0)
+		};  //The weekday timeslots that are open
+		List<TimeSpan> weekendStartHours = new List<TimeSpan>() {
+			new TimeSpan(7,0,0),
+			new TimeSpan(8,0,0),
+			new TimeSpan(9,0,0),
+			new TimeSpan(10,0,0),
+			new TimeSpan(11,0,0),
+			new TimeSpan(12,0,0),
+			new TimeSpan(13,0,0),
+		};//The satuday timeslots that are open
 		Dictionary<int, List<TimeSlot>> intervalTimeSlots = new Dictionary<int,List<TimeSlot>>();
 		Dictionary<int, List<TimeSlot>> weekdayIntervalTimeSlots = new Dictionary<int, List<TimeSlot>>();
 		Dictionary<int, List<TimeSlot>> weekendIntervalTimeSlots = new Dictionary<int, List<TimeSlot>>();
@@ -150,13 +164,39 @@ namespace TempleSchedule {
 
 			///Adjusting dates that are too close together
 			///
-			int minGap = 40;
+			int minGap = 170;
 			List<Ward> improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < minGap);
 			foreach (Ward w in improperGapWards) {
 				w.adjustGap(minGap);
 			}
 
-			improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < 35).OrderByDescending(s=>s.minTimeslotSpacing).ToList();
+			improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < minGap);
+			foreach (Ward w in improperGapWards) {
+				w.adjustGap(minGap);
+			}
+
+			improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < minGap);
+			foreach (Ward w in improperGapWards) {
+				w.adjustGap(minGap);
+			}
+
+			improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < minGap);
+			foreach (Ward w in improperGapWards) {
+				w.adjustGap(minGap);
+			}
+
+			improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < minGap);
+			foreach (Ward w in improperGapWards) {
+				w.adjustGap(minGap);
+			}
+
+			improperGapWards = this.wards.FindAll(s => s.minTimeslotSpacing < minGap - 10).OrderByDescending(s=>s.minTimeslotSpacing).ToList();
+
+			//Logging
+			string text = this.iterations.ToString() + "," + improperGapWards.Count;
+			if (improperGapWards.Count > 0)
+				text += "," + improperGapWards[improperGapWards.Count-1].minTimeslotSpacing;
+			System.IO.File.AppendAllText("log.txt", text + '\n');
 
 			if (improperGapWards.Count > 0) {
 				this.iterations++;
@@ -235,8 +275,8 @@ namespace TempleSchedule {
 				//Adding TimeSlots for weeks of the days
 				if (date.DayOfWeek != System.DayOfWeek.Saturday) {
 
-					foreach (int j in weekdayStartHours) { //Adding Weekday Slots
-						TimeSlot ts = new TimeSlot(new DateTime(date.Year, date.Month, date.Day, j, 0, 0));
+					foreach (TimeSpan j in weekdayStartHours) { //Adding Weekday Slots
+						TimeSlot ts = new TimeSlot(new DateTime(date.Year, date.Month, date.Day, j.Hours, j.Minutes, 0));
 						timeslots.Add(ts);
 						weekdaytimeslots.Add(ts);
 						weekdayIntervalTimeSlots[currentSpan].Add(ts);
@@ -247,8 +287,8 @@ namespace TempleSchedule {
 
 				} else { //Adding Saturdays
 
-					foreach (int j in weekendStartHours) { //Adding Weekend Slots
-						TimeSlot ts = new TimeSlot(new DateTime(date.Year, date.Month, date.Day, j, 0, 0));
+					foreach (TimeSpan j in weekendStartHours) { //Adding Weekend Slots
+						TimeSlot ts = new TimeSlot(new DateTime(date.Year, date.Month, date.Day, j.Hours, j.Minutes, 0));
 						timeslots.Add(ts);
 						weekendtimeslots.Add(ts);
 						weekendIntervalTimeSlots[currentSpan].Add(ts);
@@ -426,5 +466,6 @@ namespace TempleSchedule {
 			//Generating the timeslots
 			this.generateTimeSlots(dateTimePickerFrom.Value, dateTimePickerTo.Value);
 		}
+
 	}
 }
